@@ -267,7 +267,15 @@ const el = document.getElementById(id);
 return el ? el.value : "";
 }
 
-const payload = {
+/* 1. USERS TABLE (Personal + Employment basic info) */
+const userUpdate = {
+full_name: getVal("full_name"),
+email: getVal("email"),
+department: getVal("department")
+};
+
+/* 2. EMPLOYEE PROFILES TABLE */
+const profileUpdate = {
 address: getVal("address"),
 position: getVal("position"),
 employment_status: getVal("employment_status"),
@@ -282,19 +290,30 @@ birthday_leave: Number(getVal("birthday_leave") || 0),
 updated_at: new Date().toISOString()
 };
 
-const { error } = await db
+/* UPDATE USERS */
+const { error: userError } = await db
+.from("users")
+.update(userUpdate)
+.eq("id", userId);
+
+if(userError){
+alert("User update failed: " + userError.message);
+return;
+}
+
+/* UPDATE PROFILES */
+const { error: profileError } = await db
 .from("employee_profiles")
-.update(payload)
+.update(profileUpdate)
 .eq("user_id", userId);
 
-if(error){
-alert(error.message);
+if(profileError){
+alert("Profile update failed: " + profileError.message);
 return;
 }
 
 alert("Employee Updated Successfully");
 }
-
 async function deleteEmployee(){
 
 if(!confirm("Delete this employee permanently?")) return;
