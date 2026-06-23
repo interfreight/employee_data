@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Employee Profile</title>
+
+<style>
+
+body{
+font-family:Segoe UI;
+background:#f4f7fb;
+padding:30px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.08);
+}
+
+h1{
+color:#003366;
+margin-bottom:20px;
+}
+
+.info{
+margin-bottom:15px;
+}
+
+strong{
+color:#003366;
+}
+
+</style>
+</head>
+<body>
+
+<div class="card">
+
+<h1>Employee Profile</h1>
+
+<div id="profileData">
+Loading...
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const db =
+window.supabase.createClient(
+"https://tuihpvykuqbqnfyfepql.supabase.co",
+"YOUR_ANON_KEY"
+);
+
+const params =
+new URLSearchParams(window.location.search);
+
+const userId =
+params.get("id");
+
+loadProfile();
+
+async function loadProfile(){
+
+const { data:user } =
+await db
+.from("users")
+.select("*")
+.eq("id", userId)
+.single();
+
+const { data:profile } =
+await db
+.from("employee_profiles")
+.select("*")
+.eq("user_id", userId)
+.single();
+
+document.getElementById("profileData").innerHTML = `
+
+<div class="info">
+<strong>Name:</strong>
+${user.full_name}
+</div>
+
+<div class="info">
+<strong>Email:</strong>
+${user.email}
+</div>
+
+<div class="info">
+<strong>Department:</strong>
+${user.department}
+</div>
+
+<div class="info">
+<strong>Position:</strong>
+${profile.position}
+</div>
+
+<div class="info">
+<strong>Address:</strong>
+${profile.address}
+</div>
+
+<div class="info">
+<strong>SSS:</strong>
+${profile.sss}
+</div>
+
+<div class="info">
+<strong>PhilHealth:</strong>
+${profile.philhealth}
+</div>
+
+<div class="info">
+<strong>Pag-IBIG:</strong>
+${profile.pagibig}
+</div>
+
+<div class="info">
+<strong>TIN:</strong>
+${profile.tin}
+</div>
+
+<div class="info">
+<strong>Vacation Leave:</strong>
+${profile.vacation_leave}
+</div>
+
+<div class="info">
+<strong>Sick Leave:</strong>
+${profile.sick_leave}
+</div>
+
+`;
+}
+
+</script>
+
+</body>
+</html>
