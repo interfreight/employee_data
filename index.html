@@ -262,22 +262,28 @@ document.getElementById("profileData").innerHTML = `
 
 async function updateProfile(){
 
+function getVal(id){
+const el = document.getElementById(id);
+return el ? el.value : "";
+}
+
 const payload = {
-address: document.getElementById("address").value,
-position: document.getElementById("position").value,
-employment_status: document.getElementById("employment_status").value,
-sss: document.getElementById("sss").value,
-philhealth: document.getElementById("philhealth").value,
-pagibig: document.getElementById("pagibig").value,
-tin: document.getElementById("tin").value,
-vacation_leave: Number(document.getElementById("vacation_leave").value),
-sick_leave: Number(document.getElementById("sick_leave").value),
-emergency_leave: Number(document.getElementById("emergency_leave").value),
-birthday_leave: Number(document.getElementById("birthday_leave").value),
+address: getVal("address"),
+position: getVal("position"),
+employment_status: getVal("employment_status"),
+sss: getVal("sss"),
+philhealth: getVal("philhealth"),
+pagibig: getVal("pagibig"),
+tin: getVal("tin"),
+vacation_leave: Number(getVal("vacation_leave") || 0),
+sick_leave: Number(getVal("sick_leave") || 0),
+emergency_leave: Number(getVal("emergency_leave") || 0),
+birthday_leave: Number(getVal("birthday_leave") || 0),
 updated_at: new Date().toISOString()
 };
 
-const { error } = await db.from("employee_profiles")
+const { error } = await db
+.from("employee_profiles")
 .update(payload)
 .eq("user_id", userId);
 
