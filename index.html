@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Employee Profile</title>
 
 <style>
-
 *{
 margin:0;
 padding:0;
@@ -36,101 +34,6 @@ font-weight:600;
 margin-bottom:20px;
 }
 
-.back-btn:hover{
-opacity:.9;
-}
-
-.profile-header{
-background:linear-gradient(135deg,#003366,#00509d);
-color:white;
-padding:30px;
-border-radius:18px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px;
-box-shadow:0 10px 30px rgba(0,0,0,.15);
-}
-
-.profile-name{
-font-size:30px;
-font-weight:700;
-}
-
-.profile-role{
-opacity:.9;
-margin-top:5px;
-}
-
-.status{
-padding:10px 18px;
-border-radius:30px;
-background:#00c853;
-font-weight:bold;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
-gap:20px;
-}
-
-.card{
-background:white;
-padding:25px;
-border-radius:18px;
-box-shadow:0 3px 12px rgba(0,0,0,.08);
-}
-
-.card h2{
-color:#003366;
-margin-bottom:20px;
-font-size:20px;
-border-bottom:2px solid #f1f1f1;
-padding-bottom:10px;
-}
-
-.info{
-margin-bottom:12px;
-font-size:15px;
-}
-
-.info strong{
-display:block;
-color:#003366;
-margin-bottom:3px;
-}
-
-.leave-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-}
-
-.leave-card{
-padding:18px;
-border-radius:15px;
-background:#f7f9fc;
-text-align:center;
-border:1px solid #e4e9f0;
-}
-
-.leave-card h3{
-color:#003366;
-margin-bottom:10px;
-}
-
-.leave-number{
-font-size:32px;
-font-weight:bold;
-color:#00509d;
-}
-
-.loading{
-text-align:center;
-font-size:18px;
-padding:50px;
-}
 .btn-save{
 background:#28a745;
 color:white;
@@ -148,112 +51,233 @@ padding:12px 20px;
 border-radius:8px;
 cursor:pointer;
 }
-@media(max-width:768px){
 
 .profile-header{
-flex-direction:column;
-text-align:center;
-gap:15px;
+background:linear-gradient(135deg,#003366,#00509d);
+color:white;
+padding:30px;
+border-radius:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:18px;
+box-shadow:0 3px 12px rgba(0,0,0,.08);
+}
+
+.card h2{
+color:#003366;
+margin-bottom:15px;
+border-bottom:1px solid #eee;
+padding-bottom:8px;
+}
+
+.info{
+margin-bottom:12px;
+}
+
+.info label{
+display:block;
+font-weight:600;
+color:#003366;
+margin-bottom:4px;
+}
+
+input{
+width:100%;
+padding:8px;
+border:1px solid #ccc;
+border-radius:6px;
 }
 
 .leave-grid{
-grid-template-columns:1fr;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
 }
 
+.leave-card{
+padding:15px;
+background:#f7f9fc;
+border-radius:10px;
 }
 
+.loading{
+text-align:center;
+padding:50px;
+}
 </style>
 </head>
+
 <body>
+
 <div style="display:flex;gap:10px;margin-bottom:20px;">
-
-<button class="btn-save" onclick="updateProfile()">
-💾 Save Changes
-</button>
-
-<button class="btn-delete" onclick="deleteEmployee()">
-🗑 Delete Employee
-</button>
-
+<button class="btn-save" onclick="updateProfile()">💾 Save Changes</button>
+<button class="btn-delete" onclick="deleteEmployee()">🗑 Delete Employee</button>
 </div>
+
 <div class="container">
 
-<button class="back-btn" onclick="goBack()">
-← Back to Employee List
-</button>
+<button class="back-btn" onclick="goBack()">← Back to Employee List</button>
 
-<div id="profileData" class="loading">
-Loading Employee Profile...
-</div>
+<div id="profileData" class="loading">Loading Employee Profile...</div>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
-const db =
-window.supabase.createClient(
+const db = window.supabase.createClient(
 "https://tuihpvykuqbqnfyfepql.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1aWhwdnlrdXFicW5meWZlcHFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3Mjg4OTcsImV4cCI6MjA5NzMwNDg5N30.HZKS8CgFLjkZ-Bx2AIjFjurH3IsKjvf37Ft852CzJsQ"
 );
 
-const params =
-new URLSearchParams(window.location.search);
-
-const userId =
-params.get("id");
+const userId = new URLSearchParams(window.location.search).get("id");
 
 function goBack(){
-window.location.href =
-"https://interfreight.github.io/Hr_Dashboard/";
+window.location.href = "https://interfreight.github.io/Hr_Dashboard/";
 }
 
-loadProfile();
-  
+async function loadProfile(){
+
+const { data: user } = await db.from("users").select("*").eq("id", userId).single();
+const { data: profile } = await db.from("employee_profiles").select("*").eq("user_id", userId).single();
+
+document.getElementById("profileData").innerHTML = `
+<div class="profile-header">
+<div>
+<h2>${user?.full_name || 'N/A'}</h2>
+<small>${user?.role || ''} • ${user?.department || ''}</small>
+</div>
+<div>${user?.status || 'Active'}</div>
+</div>
+
+<div class="grid">
+
+<div class="card">
+<h2>Personal Info</h2>
+
+<div class="info">
+<label>Full Name</label>
+<input id="full_name" value="${user?.full_name || ''}">
+</div>
+
+<div class="info">
+<label>Email</label>
+<input id="email" value="${user?.email || ''}">
+</div>
+
+<div class="info">
+<label>Address</label>
+<input id="address" value="${profile?.address || ''}">
+</div>
+</div>
+
+<div class="card">
+<h2>Employment</h2>
+
+<div class="info">
+<label>Department</label>
+<input id="department" value="${user?.department || ''}">
+</div>
+
+<div class="info">
+<label>Position</label>
+<input id="position" value="${profile?.position || ''}">
+</div>
+
+<div class="info">
+<label>Employment Status</label>
+<input id="employment_status" value="${profile?.employment_status || ''}">
+</div>
+</div>
+
+<div class="card">
+<h2>Government IDs</h2>
+
+<div class="info">
+<label>SSS</label>
+<input id="sss" value="${profile?.sss || ''}">
+</div>
+
+<div class="info">
+<label>PhilHealth</label>
+<input id="philhealth" value="${profile?.philhealth || ''}">
+</div>
+
+<div class="info">
+<label>Pag-IBIG</label>
+<input id="pagibig" value="${profile?.pagibig || ''}">
+</div>
+
+<div class="info">
+<label>TIN</label>
+<input id="tin" value="${profile?.tin || ''}">
+</div>
+</div>
+
+<div class="card">
+<h2>Leave Credits</h2>
+
+<div class="leave-grid">
+
+<div class="leave-card">
+<label>Vacation</label>
+<input type="number" id="vacation_leave" value="${profile?.vacation_leave || 0}">
+</div>
+
+<div class="leave-card">
+<label>Sick</label>
+<input type="number" id="sick_leave" value="${profile?.sick_leave || 0}">
+</div>
+
+<div class="leave-card">
+<label>Emergency</label>
+<input type="number" id="emergency_leave" value="${profile?.emergency_leave || 0}">
+</div>
+
+<div class="leave-card">
+<label>Birthday</label>
+<input type="number" id="birthday_leave" value="${profile?.birthday_leave || 0}">
+</div>
+
+</div>
+</div>
+
+</div>
+`;
+
+}
+
 async function updateProfile(){
 
 const payload = {
-
-address:
-document.getElementById("address").value,
-
-position:
-document.getElementById("position").value,
-
-employment_status:
-document.getElementById("employment_status").value,
-
-sss:
-document.getElementById("sss").value,
-
-philhealth:
-document.getElementById("philhealth").value,
-
-pagibig:
-document.getElementById("pagibig").value,
-
-tin:
-document.getElementById("tin").value,
-
-vacation_leave:
-Number(document.getElementById("vacation_leave").value),
-
-sick_leave:
-Number(document.getElementById("sick_leave").value),
-
-emergency_leave:
-Number(document.getElementById("emergency_leave").value),
-
-birthday_leave:
-Number(document.getElementById("birthday_leave").value),
-
-updated_at:
-new Date().toISOString()
+address: document.getElementById("address").value,
+position: document.getElementById("position").value,
+employment_status: document.getElementById("employment_status").value,
+sss: document.getElementById("sss").value,
+philhealth: document.getElementById("philhealth").value,
+pagibig: document.getElementById("pagibig").value,
+tin: document.getElementById("tin").value,
+vacation_leave: Number(document.getElementById("vacation_leave").value),
+sick_leave: Number(document.getElementById("sick_leave").value),
+emergency_leave: Number(document.getElementById("emergency_leave").value),
+birthday_leave: Number(document.getElementById("birthday_leave").value),
+updated_at: new Date().toISOString()
 };
 
-const { error } = await db
-.from("employee_profiles")
+const { error } = await db.from("employee_profiles")
 .update(payload)
 .eq("user_id", userId);
 
@@ -267,233 +291,16 @@ alert("Employee Updated Successfully");
 
 async function deleteEmployee(){
 
-if(!confirm(
-"Delete this employee permanently?"
-)){
-return;
-}
+if(!confirm("Delete this employee permanently?")) return;
 
-await db
-.from("employee_profiles")
-.delete()
-.eq("user_id", userId);
-
-await db
-.from("users")
-.delete()
-.eq("id", userId);
+await db.from("employee_profiles").delete().eq("user_id", userId);
+await db.from("users").delete().eq("id", userId);
 
 alert("Employee Deleted");
-
-window.location.href =
-"https://interfreight.github.io/Hr_Dashboard/";
-}  
-  
-  
-async function loadProfile(){
-
-const { data:user } =
-await db
-.from("users")
-.select("*")
-.eq("id", userId)
-.single();
-
-const { data:profile } =
-await db
-.from("employee_profiles")
-.select("*")
-.eq("user_id", userId)
-.single();
-
-document.getElementById("profileData").innerHTML = `
-
-<div class="profile-header">
-
-<div>
-<div class="profile-name">
-${user.full_name || 'N/A'}
-</div>
-
-<div class="profile-role">
-${user.role || ''} • ${user.department || ''}
-</div>
-</div>
-
-<div class="status">
-${user.status || 'Active'}
-</div>
-
-</div>
-
-<div class="grid">
-
-<div class="card">
-<h2>Personal Information</h2>
-
-<div class="info">
-<label>Full Name</label>
-<input id="full_name"
-value="${user.full_name || ''}">
-</div>
-
-<div class="info">
-<label>Email</label>
-<input id="email"
-value="${user.email || ''}">
-</div>
-
-
-<div class="info">
-<label>Address</label>
-<input id="address"
-value="${profile.address || ''}">
-</div>
-
-<div class="card">
-<h2>Employment Information</h2>
-
-<div class="info">
-<label>Department</label>
-<input id="department"
-value="${user.department || ''}">
-</div>
-
-
-<div class="info">
-<label>Position</label>
-<input id="position"
-value="${profile.position || ''}">
-</div>
-
-<div class="info">
-<label>>Date Hired</label>
-<input id="date_hired"
-value="${profile.date_hired || ''}">
-</div>
-
-<div class="info">
-<label>Employment Status</label>
-<input id="employment_status"
-value="${profile.employment_status || ''}">
-</div>
-
-<div class="info">
-<strong</strong>
-</div>
-</div>
-
-<div class="card">
-<h2>Emergency Contact</h2>
-
-<div class="info">
-<label>Contact Person</label>
-<input id="emergency_contact_name"
-value="${profile.emergency_contact_name || ''}">
-</div>
-
-<div class="info">
-<label>Contact Number</label>
-<input id="emergency_contact_number"
-value="${profile.emergency_contact_number || ''}">
-</div>
-
-<div class="card">
-<h2>Government IDs</h2>
-
-<div class="info">
-<label>SSS</label>
-<input id="sss"
-value="${profile.sss || ''}">
-</div>
-
-<div class="info">
-<label>philHealth</label>
-<input id="PhilHealth"
-value="${profile.PhilHealth || ''}">
-</div>
-
-<div class="info">
-<label>Pag-IBIG</label>
-<input id="pagibig"
-value="${profile.pagibig || ''}">
-</div>
-
-<div class="info">
-<strong></strong>
-</div>
-
-<div class="info">
-<label>TIN</label>
-<input id="tin"
-value="${profile.tin || ''}">
-</div>
-
-
-<div class="card" style="grid-column:1/-1;">
-<h2>Leave Credits</h2>
-
-<div class="leave-grid">
-
-<div class="leave-card">
-<h3>Vacation Leave</h3>
-<input
-type="number"
-id="vacation_leave"
-value="${profile.vacation_leave || 0}">
-</div>
-
-<div class="leave-card">
-<h3>Sick Leave</h3>
-<input
-type="number"
-id="sick_leave"
-value="${profile.sick_leave || 0}">
-</div>
-
-<div class="leave-card">
-<h3>Emergency Leave</h3>
-<input
-type="number"
-id="emergency_leave"
-value="${profile.emergency_leave || 0}">
-</div>
-
-<div class="leave-card">
-<h3>Companssionate leave</h3>
-<input
-type="number"
-id="birthday_leave"
-value="${profile.birthday_leave || 0}">
-</div>
-
-
-</div>
-</div>
-
-<div class="card" style="grid-column:1/-1;">
-<h2>System Information</h2>
-
-<div class="info">
-<strong>Profile Completed</strong>
-${profile.profile_completed ? 'Yes' : 'No'}
-</div>
-
-<div class="info">
-<strong>Created At</strong>
-${profile.created_at || '-'}
-</div>
-
-<div class="info">
-<strong>Updated At</strong>
-${profile.updated_at || '-'}
-</div>
-</div>
-
-</div>
-`;
+window.location.href = "https://interfreight.github.io/Hr_Dashboard/";
 }
 
+loadProfile();
 </script>
 
 </body>
