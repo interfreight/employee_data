@@ -1,11 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Employee Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INTERFREIGHT HRMS - Employee Profile</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+table th{
+background:#003366;
+color:white;
+padding:15px;
+}
+
+table td{
+padding:12px;
+  
+border-bottom:1px solid #ddd;
+}
+
+table input{
+width:100%;
+padding:10px;
+border:1px solid #ddd;
+border-radius:8px;
+}
+
+.smallDelete{
+background:#dc3545;
+color:white;
+border:none;
+padding:10px 15px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.smallDelete:hover{
+background:#b52a37;
+}
 *{
 margin:0;
 padding:0;
@@ -14,130 +53,753 @@ font-family:'Segoe UI',sans-serif;
 }
 
 body{
-background:#eef3f9;
-padding:30px;
+background:#edf2f8;
 }
 
-.container{
-max-width:1200px;
-margin:auto;
-}
-
-.back-btn{
-background:#003366;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:10px;
-cursor:pointer;
-font-weight:600;
-margin-bottom:20px;
-}
-
-.btn-save{
-background:#28a745;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:8px;
-cursor:pointer;
-}
-
-.btn-delete{
-background:#dc3545;
-color:white;
-border:none;
-padding:12px 20px;
-border-radius:8px;
-cursor:pointer;
-}
-
-.profile-header{
+.header{
 background:linear-gradient(135deg,#003366,#00509d);
-color:white;
-padding:30px;
-border-radius:18px;
+padding:25px 40px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:25px;
+color:white;
+box-shadow:0 5px 15px rgba(0,0,0,.15);
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
+.logo{
+display:flex;
+align-items:center;
 gap:20px;
+}
+
+.logo img{
+width:90px;
+}
+
+.logo h1{
+font-size:30px;
+}
+
+.logo p{
+font-size:14px;
+opacity:.8;
+}
+
+.container{
+width:95%;
+max-width:1500px;
+margin:auto;
+padding:30px 0;
+}
+
+.action-bar{
+display:flex;
+gap:15px;
+margin-bottom:20px;
+}
+
+.btn{
+border:none;
+padding:14px 25px;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+font-size:15px;
+}
+
+.saveBtn{
+background:#28a745;
+color:white;
+}
+
+.printBtn{
+background:#4472B8;
+color:white;
+}
+
+.deleteBtn{
+background:#dc3545;
+color:white;
+}
+
+.backBtn{
+background:#003366;
+color:white;
 }
 
 .card{
 background:white;
-padding:25px;
-border-radius:18px;
-box-shadow:0 3px 12px rgba(0,0,0,.08);
+padding:30px;
+border-radius:20px;
+box-shadow:0 5px 20px rgba(0,0,0,.08);
+margin-bottom:25px;
 }
 
 .card h2{
 color:#003366;
+margin-bottom:20px;
+border-left:7px solid #F4C542;
+padding-left:10px;
+}
+
+.profile-top{
+display:flex;
+gap:40px;
+align-items:center;
+}
+
+.photo-section{
+width:250px;
+text-align:center;
+}
+
+.photo-section img{
+width:180px;
+height:180px;
+border-radius:50%;
+object-fit:cover;
+border:6px solid #4472B8;
 margin-bottom:15px;
-border-bottom:1px solid #eee;
-padding-bottom:8px;
 }
 
-.info{
-margin-bottom:12px;
-}
-
-.info label{
-display:block;
-font-weight:600;
-color:#003366;
-margin-bottom:4px;
-}
-
-input{
+.photo-section input{
 width:100%;
-padding:8px;
-border:1px solid #ccc;
-border-radius:6px;
 }
 
-.leave-grid{
+.summary{
+flex:1;
+}
+
+.summary h1{
+color:#003366;
+margin-bottom:10px;
+}
+
+.summary p{
+color:#777;
+font-size:16px;
+margin-bottom:8px;
+}
+
+.grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:15px;
+gap:20px;
 }
 
-.leave-card{
-padding:15px;
-background:#f7f9fc;
+.form-group{
+display:flex;
+flex-direction:column;
+}
+
+label{
+font-weight:600;
+margin-bottom:6px;
+color:#003366;
+}
+
+input,
+select,
+textarea{
+padding:12px;
+border:1px solid #ddd;
 border-radius:10px;
+outline:none;
 }
 
-.loading{
-text-align:center;
-padding:50px;
+textarea{
+resize:none;
+height:90px;
 }
+
+input:focus{
+border-color:#4472B8;
+}
+#toast{
+position:fixed;
+top:30px;
+right:30px;
+background:#28a745;
+color:white;
+padding:16px 25px;
+border-radius:12px;
+font-weight:bold;
+box-shadow:0 5px 15px rgba(0,0,0,.2);
+display:none;
+z-index:9999;
+}
+
+#loadingScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(255,255,255,.8);
+display:none;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:99999;
+}
+
+.loader{
+width:70px;
+height:70px;
+border:8px solid #ddd;
+border-top:8px solid #003366;
+border-radius:50%;
+animation:spin 1s linear infinite;
+margin-bottom:15px;
+}
+
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
+ @media print{
+
+.action-bar,
+.smallDelete,
+button,
+#loadingScreen,
+#toast,
+input[type=file]{
+display:none !important;
+}
+
+body{
+background:white;
+}
+
+.card{
+box-shadow:none;
+border:1px solid #ddd;
+page-break-inside:avoid;
+}
+
+input,
+textarea,
+select{
+border:none;
+background:white;
+padding:0;
+}
+
+} 
+@media(max-width:900px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.profile-top{
+flex-direction:column;
+}
+
+}
+
 </style>
 </head>
 
 <body>
 
-<div style="display:flex;gap:10px;margin-bottom:20px;">
-<button class="btn-save" onclick="updateProfile()">💾 Save Changes</button>
-<button class="btn-delete" onclick="deleteEmployee()">🗑 Delete Employee</button>
+<div class="header">
+<p id="printDate"></p>
+<div class="logo">
+<img src="3. INTERFREIGHT COMPANY LOGO.png">
+
+<div>
+<h1>INTERFREIGHT HRMS</h1>
+<p>Employee Profile Management</p>
+</div>
+
+</div>
+
 </div>
 
 <div class="container">
 
-<button class="back-btn" onclick="goBack()">← Back to Employee List</button>
+<div class="action-bar">
+<button type="button"
+class="btn saveBtn"
+id="saveBtn"
+onclick="saveEmployee()">
+💾 Save Changes
+</button>
 
-<div id="profileData" class="loading">Loading Employee Profile...</div>
+<button class="btn printBtn" onclick="printEmployee()">
+🖨 Print
+</button>
+
+<button class="btn deleteBtn" onclick="deleteEmployee()">
+🗑 Delete
+</button>
+
+<button class="btn backBtn"
+onclick="location.href='https://interfreight.github.io/employee_list/'">
+← Employee List
+</button>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- PHOTO + SUMMARY -->
+
+<div class="card">
+
+<div class="profile-top">
+
+<div class="photo-section">
+
+<img id="photoPreview"
+src="https://placehold.co/180x180?text=PHOTO">
+
+<input
+type="file"
+id="profilePhoto"
+accept="image/*">
+
+</div>
+
+<div class="summary">
+
+<h1 id="displayName">Employee Name</h1>
+
+<p id="displayEmail">Email Address</p>
+
+<p id="displayDepartment">Department</p>
+
+<p id="displayPosition">Position</p>
+
+<p id="displayStatus">Status</p>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- PERSONAL INFORMATION -->
+
+<div class="card">
+
+<h2>👤 Personal Information</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>Employee Number</label>
+<input id="employee_number" readonly>
+</div>
+
+<div class="form-group">
+<label>Full Name</label>
+<input id="full_name" readonly>
+</div>
+
+<div class="form-group">
+<label>Email</label>
+<input id="email" readonly>
+</div>
+
+<div class="form-group">
+<label>Father Name</label>
+<input id="father_name">
+</div>
+
+<div class="form-group">
+<label>Mother Name</label>
+<input id="mother_name">
+</div>
+  
+<div class="form-group">
+<label>Address</label>
+<input id="address">
+</div>
+  
+<div class="form-group">
+<label>Date of Birth</label>
+<input type="date" id="date_of_birth">
+</div>
+
+<div class="form-group">
+<label>Place of Birth</label>
+<input id="place_of_birth">
+</div>
+
+<div class="form-group">
+<label>Gender</label>
+<select id="gender">
+<option>Male</option>
+<option>Female</option>
+</select>
+</div>
+
+<div class="form-group">
+<label>Marital Status</label>
+<input id="marital_status">
+</div>
+
+<div class="form-group">
+<label>Nationality</label>
+<input id="nationality">
+</div>
+
+<div class="form-group">
+<label>Citizenship</label>
+<input id="citizenship">
+</div>
+
+<div class="form-group">
+<label>Religion</label>
+<input id="religion">
+</div>
+
+</div> <!-- grid -->
+</div> <!-- card -->
+
+<!-- CONTACT INFORMATION -->
+
+<div class="card">
+
+<h2>📞 Contact Information</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>Mobile Number</label>
+<input id="mobile_number">
+</div>
+
+<div class="form-group">
+<label>Personal Email</label>
+<input id="personal_email">
+</div>
+
+<div class="form-group">
+<label>Home Address</label>
+<textarea id="home_address"></textarea>
+</div>
+
+<div class="form-group">
+<label>Local Address</label>
+<textarea id="local_address"></textarea>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- GOVERNMENT INFORMATION -->
+
+<div class="card">
+
+<h2>🪪 Government Information</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>SSS Number</label>
+<input id="sss">
+</div>
+
+<div class="form-group">
+<label>PhilHealth Number</label>
+<input id="philhealth">
+</div>
+
+<div class="form-group">
+<label>Pag-IBIG Number</label>
+<input id="pagibig">
+</div>
+
+<div class="form-group">
+<label>TIN Number</label>
+<input id="tin">
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EMERGENCY CONTACT -->
+
+<div class="card">
+
+<h2>🚨 Emergency Contact</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>Contact Name</label>
+<input id="emergency_contact_name">
+</div>
+
+<div class="form-group">
+<label>Contact Number</label>
+<input id="emergency_contact_number">
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EMPLOYMENT INFORMATION -->
+
+<div class="card">
+
+<h2>💼 Employment Information</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>Department</label>
+<input id="department">
+</div>
+
+<div class="form-group">
+<label>Position</label>
+<input id="position">
+</div>
+
+<div class="form-group">
+<label>Employment Status</label>
+<input id="employment_status">
+</div>
+
+<div class="form-group">
+<label>Date Hired</label>
+<input type="date" id="date_hired">
+</div>
+
+</div>
+
+</div>
+
+
+<!-- LEAVE CREDITS -->
+
+<div class="card">
+
+<h2>🏖 Leave Credits</h2>
+
+<div class="grid">
+
+<div class="form-group">
+<label>Vacation Leave</label>
+<input type="number" id="vacation_leave">
+</div>
+
+<div class="form-group">
+<label>Sick Leave</label>
+<input type="number" id="sick_leave">
+</div>
+
+<div class="form-group">
+<label>Emergency Leave</label>
+<input type="number" id="emergency_leave">
+</div>
+
+<div class="form-group">
+<label>Birthday Leave</label>
+<input type="number" id="birthday_leave">
+</div>
+
+<div class="form-group">
+<label>Maternity Leave</label>
+<input type="number" id="maternity_leave">
+</div>
+
+<div class="form-group">
+<label>Paternity Leave</label>
+<input type="number" id="paternity_leave">
+</div>
+
+<div class="form-group">
+<label>Study Leave</label>
+<input type="number" id="study_leave">
+</div>
+
+</div>
+
+</div>
+  <!-- EDUCATIONAL BACKGROUND -->
+
+<div class="card">
+
+<h2>🎓 Educational Background</h2>
+
+<button class="btn saveBtn"
+onclick="addEducationRow()">
++ Add Education
+</button>
+
+<br><br>
+
+<table id="educationTable">
+
+<thead>
+
+<tr>
+<th>Education Level</th>
+<th>Institute</th>
+<th>Year Completed</th>
+<th>Certificate</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody>
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- DEPENDENTS -->
+
+<div class="card">
+
+<h2>👨‍👩‍👧 Dependents</h2>
+
+<button class="btn saveBtn" onclick="addDependentRow()">
++ Add Dependent
+</button>
+
+<br><br>
+
+<table id="dependentTable">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Relationship</th>
+<th>Birth Date</th>
+<th>Occupation</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+</tbody>
+
+</table>
+
+</div>
+
+
+<!-- EMPLOYMENT HISTORY -->
+
+<div class="card">
+
+<h2>🏢 Employment History</h2>
+
+<button class="btn saveBtn" onclick="addHistoryRow()">
++ Add Employment
+</button>
+
+<br><br>
+
+<table id="historyTable">
+
+<thead>
+<tr>
+<th>Company</th>
+<th>Job Title</th>
+<th>Date From</th>
+<th>Date To</th>
+<th>Reason For Leaving</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+</tbody>
+
+</table>
+
+</div>
+
+</div> <!-- container -->
+
 
 <script>
+
+function addEducationRow(){
+
+let row =
+document.querySelector("#educationTable tbody")
+.insertRow();
+
+row.innerHTML = `
+<td><input></td>
+<td><input></td>
+<td><input></td>
+<td><input></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
+`;
+
+}
+
+
+function addDependentRow(){
+
+let row =
+document.querySelector("#dependentTable tbody")
+.insertRow();
+
+row.innerHTML = `
+<td><input></td>
+<td><input></td>
+<td><input type="date"></td>
+<td><input></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
+`;
+
+}
+
+
+function addHistoryRow(){
+
+let row =
+document.querySelector("#historyTable tbody")
+.insertRow();
+
+row.innerHTML = `
+<td><input></td>
+<td><input></td>
+<td><input type="date"></td>
+<td><input type="date"></td>
+<td><input></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
+`;
+
+}
+
+</script>
+<script>
+
 const db = window.supabase.createClient(
 "https://tuihpvykuqbqnfyfepql.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1aWhwdnlrdXFicW5meWZlcHFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3Mjg4OTcsImV4cCI6MjA5NzMwNDg5N30.HZKS8CgFLjkZ-Bx2AIjFjurH3IsKjvf37Ft852CzJsQ"
@@ -145,188 +807,637 @@ const db = window.supabase.createClient(
 
 const userId = new URLSearchParams(window.location.search).get("id");
 
-function goBack(){
-window.location.href = "https://interfreight.github.io/Hr_Dashboard/";
+loadEmployee();
+
+async function loadEmployee(){
+
+// USERS TABLE
+const { data:user } = await db
+.from("users")
+.select("*")
+.eq("id",userId)
+.single();
+
+
+// EMPLOYEE PROFILE
+const { data:profile } = await db
+.from("employee_profiles")
+.select("*")
+.eq("user_id",userId)
+.single();
+
+
+// HEADER SUMMARY
+
+document.getElementById("displayName").innerText =
+user?.full_name || "";
+
+document.getElementById("displayEmail").innerText =
+user?.email || "";
+
+document.getElementById("displayDepartment").innerText =
+profile?.department || "";
+
+document.getElementById("displayPosition").innerText =
+profile?.position || "";
+
+document.getElementById("displayStatus").innerText =
+profile?.employment_status || "";
+
+
+// PHOTO
+
+if(profile?.profile_photo){
+document.getElementById("photoPreview").src =
+profile.profile_photo;
 }
 
-async function loadProfile(){
 
-const { data: user } = await db.from("users").select("*").eq("id", userId).single();
-const { data: profile } = await db.from("employee_profiles").select("*").eq("user_id", userId).single();
+// PERSONAL
 
-document.getElementById("profileData").innerHTML = `
-<div class="profile-header">
-<div>
-<h2>${user?.full_name || 'N/A'}</h2>
-<small>${user?.role || ''} • ${user?.department || ''}</small>
-</div>
-<div>${user?.status || 'Active'}</div>
-</div>
+document.getElementById("employee_number").value =
+user?.id || "";
 
-<div class="grid">
+document.getElementById("full_name").value =
+user?.full_name || "";
 
-<div class="card">
-<h2>Personal Info</h2>
+document.getElementById("email").value =
+user?.email || "";
 
-<div class="info">
-<label>Full Name</label>
-<input id="full_name" value="${user?.full_name || ''}">
-</div>
+document.getElementById("father_name").value =
+profile?.father_name || "";
 
-<div class="info">
-<label>Email</label>
-<input id="email" value="${user?.email || ''}">
-</div>
+document.getElementById("mother_name").value =
+profile?.mother_name || "";
 
-<div class="info">
-<label>Address</label>
-<input id="address" value="${profile?.address || ''}">
-</div>
-</div>
+  document.getElementById("address").value =
+profile?.address || "";
+  
+document.getElementById("date_of_birth").value =
+profile?.date_of_birth || "";
 
-<div class="card">
-<h2>Employment</h2>
+document.getElementById("place_of_birth").value =
+profile?.place_of_birth || "";
 
-<div class="info">
-<label>Department</label>
-<input id="department" value="${user?.department || ''}">
-</div>
+document.getElementById("gender").value =
+profile?.gender || "";
 
-<div class="info">
-<label>Position</label>
-<input id="position" value="${profile?.position || ''}">
-</div>
+document.getElementById("marital_status").value =
+profile?.marital_status || "";
 
-<div class="info">
-<label>Employment Status</label>
-<input id="employment_status" value="${profile?.employment_status || ''}">
-</div>
-</div>
+document.getElementById("nationality").value =
+profile?.nationality || "";
 
-<div class="card">
-<h2>Government IDs</h2>
+document.getElementById("citizenship").value =
+profile?.citizenship || "";
 
-<div class="info">
-<label>SSS</label>
-<input id="sss" value="${profile?.sss || ''}">
-</div>
+document.getElementById("religion").value =
+profile?.religion || "";
 
-<div class="info">
-<label>PhilHealth</label>
-<input id="philhealth" value="${profile?.philhealth || ''}">
-</div>
 
-<div class="info">
-<label>Pag-IBIG</label>
-<input id="pagibig" value="${profile?.pagibig || ''}">
-</div>
+// CONTACT
 
-<div class="info">
-<label>TIN</label>
-<input id="tin" value="${profile?.tin || ''}">
-</div>
-</div>
+document.getElementById("mobile_number").value =
+profile?.mobile_number || "";
 
-<div class="card">
-<h2>Leave Credits</h2>
+document.getElementById("personal_email").value =
+profile?.personal_email || "";
 
-<div class="leave-grid">
+document.getElementById("home_address").value =
+profile?.home_address || "";
 
-<div class="leave-card">
-<label>Vacation</label>
-<input type="number" id="vacation_leave" value="${profile?.vacation_leave || 0}">
-</div>
+document.getElementById("local_address").value =
+profile?.local_address || "";
 
-<div class="leave-card">
-<label>Sick</label>
-<input type="number" id="sick_leave" value="${profile?.sick_leave || 0}">
-</div>
 
-<div class="leave-card">
-<label>Emergency</label>
-<input type="number" id="emergency_leave" value="${profile?.emergency_leave || 0}">
-</div>
+// GOVERNMENT
 
-<div class="leave-card">
-<label>Birthday</label>
-<input type="number" id="birthday_leave" value="${profile?.birthday_leave || 0}">
-</div>
+document.getElementById("sss").value =
+profile?.sss || "";
 
-</div>
-</div>
+document.getElementById("philhealth").value =
+profile?.philhealth || "";
 
-</div>
+document.getElementById("pagibig").value =
+profile?.pagibig || "";
+
+document.getElementById("tin").value =
+profile?.tin || "";
+
+
+// EMERGENCY
+
+document.getElementById("emergency_contact_name").value =
+profile?.emergency_contact_name || "";
+
+document.getElementById("emergency_contact_number").value =
+profile?.emergency_contact_number || "";
+
+
+// EMPLOYMENT
+
+document.getElementById("department").value =
+profile?.department || "";
+
+document.getElementById("position").value =
+profile?.position || "";
+
+document.getElementById("employment_status").value =
+profile?.employment_status || "";
+
+document.getElementById("date_hired").value =
+profile?.date_hired || "";
+
+
+// LEAVES
+
+document.getElementById("vacation_leave").value =
+profile?.vacation_leave || 0;
+
+document.getElementById("sick_leave").value =
+profile?.sick_leave || 0;
+
+document.getElementById("emergency_leave").value =
+profile?.emergency_leave || 0;
+
+document.getElementById("birthday_leave").value =
+profile?.birthday_leave || 0;
+
+document.getElementById("maternity_leave").value =
+profile?.maternity_leave || 0;
+
+document.getElementById("paternity_leave").value =
+profile?.paternity_leave || 0;
+
+document.getElementById("study_leave").value =
+profile?.study_leave || 0;
+
+
+
+// ===== EDUCATION =====
+
+const { data:education } = await db
+.from("employee_education")
+.select("*")
+.eq("employee_id",profile.id);
+
+if(education){
+education.forEach(e=>{
+
+let row =
+document.querySelector("#educationTable tbody")
+.insertRow();
+
+row.innerHTML=`
+<td><input value="${e.education_level || ''}"></td>
+<td><input value="${e.institute || ''}"></td>
+<td><input value="${e.year_completed || ''}"></td>
+<td><input value="${e.certificate_obtained || ''}"></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
 `;
 
+});
 }
 
-async function updateProfile(){
 
-function getVal(id){
-const el = document.getElementById(id);
-return el ? el.value : "";
+// ===== DEPENDENTS =====
+
+const { data:dependents } = await db
+.from("employee_dependents")
+.select("*")
+.eq("employee_id",profile.id);
+
+if(dependents){
+dependents.forEach(d=>{
+
+let row =
+document.querySelector("#dependentTable tbody")
+.insertRow();
+
+row.innerHTML=`
+<td><input value="${d.dependent_name || ''}"></td>
+<td><input value="${d.relationship || ''}"></td>
+<td><input type="date" value="${d.date_of_birth || ''}"></td>
+<td><input value="${d.occupation || ''}"></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
+`;
+
+});
+
 }
 
-/* 1. USERS TABLE (Personal + Employment basic info) */
-const userUpdate = {
-full_name: getVal("full_name"),
-email: getVal("email"),
-department: getVal("department")
-};
+// ===== HISTORY =====
 
-/* 2. EMPLOYEE PROFILES TABLE */
+const { data:history } = await db
+.from("employee_employment_history")
+.select("*")
+.eq("employee_id",profile.id);
+
+if(history){
+history.forEach(h=>{
+
+let row =
+document.querySelector("#historyTable tbody")
+.insertRow();
+
+row.innerHTML=`
+<td><input value="${h.company_name || ''}"></td>
+<td><input value="${h.job_title || ''}"></td>
+<td><input type="date" value="${h.date_from || ''}"></td>
+<td><input type="date" value="${h.date_to || ''}"></td>
+<td><input value="${h.leaving_reason || ''}"></td>
+<td>
+<button class="smallDelete"
+onclick="this.parentElement.parentElement.remove()">
+Delete
+</button>
+</td>
+`;
+
+});
+
+}
+}
+  async function uploadPhoto(){
+
+const file =
+document.getElementById("profilePhoto").files[0];
+
+if(!file) return null;
+
+
+// get employee profile
+
+const {data:profile} = await db
+.from("employee_profiles")
+.select("id")
+.eq("user_id",userId)
+.single();
+
+const fileName =
+profile.id + "_" + Date.now() + ".jpg";
+
+
+// upload to storage
+
+const {error} = await db.storage
+.from("employee-photos")
+.upload(fileName,file,{
+upsert:true
+});
+
+if(error){
+
+showToast(
+error.message,
+"#dc3545"
+);
+
+return null;
+
+}
+
+
+// get public url
+
+const {data:urlData} =
+db.storage
+.from("employee-photos")
+.getPublicUrl(fileName);
+
+return urlData.publicUrl;
+
+}
+  function showToast(message,color="#28a745"){
+
+const toast =
+document.getElementById("toast");
+
+toast.innerHTML = message;
+toast.style.background = color;
+toast.style.display = "block";
+
+setTimeout(()=>{
+
+toast.style.display = "none";
+
+},3000);
+
+}
+
+
+function showLoading(){
+
+document.getElementById("loadingScreen")
+.style.display = "flex";
+
+}
+
+function hideLoading(){
+
+document.getElementById("loadingScreen")
+.style.display = "none";
+
+}
+async function saveEmployee(){
+  document.getElementById("saveBtn").disabled = true;
+  showLoading();
+let photoUrl = null;
+
+if(document.getElementById("profilePhoto").files.length){
+
+photoUrl = await uploadPhoto();
+
+}
 const profileUpdate = {
-address: getVal("address"),
-position: getVal("position"),
-employment_status: getVal("employment_status"),
-sss: getVal("sss"),
-philhealth: getVal("philhealth"),
-pagibig: getVal("pagibig"),
-tin: getVal("tin"),
-vacation_leave: Number(getVal("vacation_leave") || 0),
-sick_leave: Number(getVal("sick_leave") || 0),
-emergency_leave: Number(getVal("emergency_leave") || 0),
-birthday_leave: Number(getVal("birthday_leave") || 0),
-updated_at: new Date().toISOString()
+profile_photo: photoUrl ||
+document.getElementById("photoPreview").src,
+father_name: document.getElementById("father_name").value,
+mother_name: document.getElementById("mother_name").value,
+  address: document.getElementById("address").value,
+date_of_birth: document.getElementById("date_of_birth").value,
+place_of_birth: document.getElementById("place_of_birth").value,
+gender: document.getElementById("gender").value,
+marital_status: document.getElementById("marital_status").value,
+nationality: document.getElementById("nationality").value,
+citizenship: document.getElementById("citizenship").value,
+religion: document.getElementById("religion").value,
+
+mobile_number: document.getElementById("mobile_number").value,
+personal_email: document.getElementById("personal_email").value,
+home_address: document.getElementById("home_address").value,
+local_address: document.getElementById("local_address").value,
+
+sss: document.getElementById("sss").value,
+philhealth: document.getElementById("philhealth").value,
+pagibig: document.getElementById("pagibig").value,
+tin: document.getElementById("tin").value,
+
+emergency_contact_name:
+document.getElementById("emergency_contact_name").value,
+
+emergency_contact_number:
+document.getElementById("emergency_contact_number").value,
+
+department: document.getElementById("department").value,
+position: document.getElementById("position").value,
+employment_status: document.getElementById("employment_status").value,
+date_hired: document.getElementById("date_hired").value,
+
+vacation_leave:
+Number(document.getElementById("vacation_leave").value),
+
+sick_leave:
+Number(document.getElementById("sick_leave").value),
+
+emergency_leave:
+Number(document.getElementById("emergency_leave").value),
+
+birthday_leave:
+Number(document.getElementById("birthday_leave").value),
+
+maternity_leave:
+Number(document.getElementById("maternity_leave").value),
+
+paternity_leave:
+Number(document.getElementById("paternity_leave").value),
+
+study_leave:
+Number(document.getElementById("study_leave").value)
+
 };
 
-/* UPDATE USERS */
-const { error: userError } = await db
-.from("users")
-.update(userUpdate)
-.eq("id", userId);
 
-if(userError){
-alert("User update failed: " + userError.message);
-return;
-}
-
-/* UPDATE PROFILES */
-const { error: profileError } = await db
+await db
 .from("employee_profiles")
 .update(profileUpdate)
-.eq("user_id", userId);
+.eq("user_id",userId);
 
-if(profileError){
-alert("Profile update failed: " + profileError.message);
+
+await db
+.from("users")
+.update({
+
+full_name: document.getElementById("full_name").value,
+
+email: document.getElementById("email").value
+
+})
+.eq("id",userId);
+  
+const {data:profile} = await db
+.from("employee_profiles")
+.select("id")
+.eq("user_id",userId)
+.single();
+
+const employeeId = profile.id;
+
+  // DELETE OLD EDUCATION
+
+await db
+.from("employee_education")
+.delete()
+.eq("employee_id",employeeId);
+
+
+// INSERT NEW EDUCATION
+
+let educationRows =
+document.querySelectorAll("#educationTable tbody tr");
+
+for(let row of educationRows){
+
+let inputs = row.querySelectorAll("input");
+
+await db
+.from("employee_education")
+.insert({
+
+employee_id: employeeId,
+
+education_level: inputs[0].value,
+
+institute: inputs[1].value,
+
+year_completed: inputs[2].value,
+
+certificate_obtained: inputs[3].value
+
+});
+
+}
+  await db
+.from("employee_dependents")
+.delete()
+.eq("employee_id",employeeId);
+
+let dependentRows =
+document.querySelectorAll("#dependentTable tbody tr");
+
+for(let row of dependentRows){
+
+let inputs = row.querySelectorAll("input");
+
+await db
+.from("employee_dependents")
+.insert({
+
+employee_id: employeeId,
+
+dependent_name: inputs[0].value,
+
+relationship: inputs[1].value,
+
+date_of_birth: inputs[2].value,
+
+occupation: inputs[3].value
+
+});
+
+}
+  await db
+.from("employee_employment_history")
+.delete()
+.eq("employee_id",employeeId);
+
+let historyRows =
+document.querySelectorAll("#historyTable tbody tr");
+
+for(let row of historyRows){
+
+let inputs = row.querySelectorAll("input");
+
+await db
+.from("employee_employment_history")
+.insert({
+
+employee_id: employeeId,
+
+company_name: inputs[0].value,
+
+job_title: inputs[1].value,
+
+date_from: inputs[2].value,
+
+date_to: inputs[3].value,
+
+leaving_reason: inputs[4].value
+
+});
+
+}
+  
+hideLoading();
+
+showToast(
+"✅ Employee Updated Successfully",
+"#28a745"
+);
+
+document.getElementById("saveBtn").disabled = false;
+
+}
+  async function deleteEmployee(){
+
+if(!confirm("Delete employee permanently?"))
 return;
+    showLoading();
+
+
+// get profile first
+const {data:profile}=await db
+.from("employee_profiles")
+.select("id")
+.eq("user_id",userId)
+.single();
+
+
+// delete child tables first
+
+await db
+.from("employee_education")
+.delete()
+.eq("employee_id",profile.id);
+
+
+await db
+.from("employee_dependents")
+.delete()
+.eq("employee_id",profile.id);
+
+
+await db
+.from("employee_employment_history")
+.delete()
+.eq("employee_id",profile.id);
+
+
+// delete profile
+
+await db
+.from("employee_profiles")
+.delete()
+.eq("user_id",userId);
+
+
+// delete user
+
+await db
+.from("users")
+.delete()
+.eq("id",userId);
+
+
+hideLoading();
+
+showToast(
+"🗑 Employee Deleted Successfully",
+"#dc3545"
+);
+
+location.href =
+"https://interfreight.github.io/employee_list/";
+
 }
+  document
+.getElementById("profilePhoto")
+.addEventListener("change",function(){
 
-alert("Employee Updated Successfully");
+const file = this.files[0];
+
+if(!file) return;
+
+document.getElementById("photoPreview").src =
+URL.createObjectURL(file);
+
+});
+  function printEmployee(){
+
+document.getElementById("printDate").innerHTML =
+"Printed: " + new Date().toLocaleDateString();
+
+window.print();
+
 }
-async function deleteEmployee(){
-
-if(!confirm("Delete this employee permanently?")) return;
-
-await db.from("employee_profiles").delete().eq("user_id", userId);
-await db.from("users").delete().eq("id", userId);
-
-alert("Employee Deleted");
-window.location.href = "https://interfreight.github.io/Hr_Dashboard/";
-}
-
-loadProfile();
+  document.getElementById("printDate").innerHTML =
+"Printed: " + new Date().toLocaleDateString();
 </script>
+  <div id="toast"></div>
 
+<div id="loadingScreen">
+<div class="loader"></div>
+<p>Please wait...</p>
+</div>
 </body>
 </html>
